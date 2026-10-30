@@ -49,5 +49,10 @@
   },
   "main": "electron/dist/main.js",
   "description": "Local Chat",
-  "author": "Kherbache Yacine"
+  "author": "Kherbache Yacine",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Ykherbache/llm-tests.git",
+    "directory": "chat"
+  }
 }
