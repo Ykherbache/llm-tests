@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
+import { notFound } from "next/navigation";
 import Link from "next/link";
 import { ArrowDown, ArrowLeft, ArrowUp } from "lucide-react";
 import { DecodeChart, LagStrip } from "@/components/BenchCharts";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { buttonVariants } from "@/components/ui/button";
 import { CPU_ROWS, GPU_ROWS, LAG_IDLE_S, LAG_ROWS, PICKS, formatChange } from "@/lib/benchmarks";
+import { IS_DESKTOP } from "@/lib/profile";
 import "./benchmarks.css";
 
 export const metadata: Metadata = {
@@ -57,6 +59,7 @@ const th = "px-3 py-2 text-left text-xs font-medium text-muted-foreground";
 const td = "px-3 py-2 align-top";
 
 export default function BenchmarksPage() {
+  if (IS_DESKTOP) notFound();
   const metrics = [
     { key: "p", label: "Prefill" },
     { key: "p8k", label: "Prefill, 8k deep" },

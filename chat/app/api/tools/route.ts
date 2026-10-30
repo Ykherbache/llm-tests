@@ -1,5 +1,5 @@
 import { fetchPage } from "@/lib/fetchPage";
-import { startSearxng, webSearch } from "@/lib/searxng";
+import { startSearxng, webSearch } from "@/lib/search";
 import { isConnRefused, json, rejectNonLocal, SEARXNG_URL } from "@/lib/server";
 import { isToolName, PAGE_TEXT_LIMIT } from "@/lib/tools";
 

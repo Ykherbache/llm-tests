@@ -1,8 +1,8 @@
 "use client";
 
-import { Activity, ChartColumn, Menu, Settings2 } from "lucide-react";
+import { Activity, ChartColumn, Download, Menu, Settings2 } from "lucide-react";
 import Link from "next/link";
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import { useChat } from "@/hooks/useChat";
@@ -13,6 +13,7 @@ import { useModelInfo } from "@/hooks/useModelInfo";
 import { placementText } from "@/lib/backend";
 import { CONTEXT_WINDOW } from "@/lib/models";
 import { startSearch } from "@/lib/ollama";
+import { IS_DESKTOP } from "@/lib/profile";
 import type { ConversationMeta } from "@/lib/types";
 import { BackendSwitch } from "./BackendSwitch";
 import { Composer, type ComposerHandle } from "./Composer";
@@ -20,6 +21,7 @@ import { CONTEXT_BLOCK, CONTEXT_WARN, ContextMeter } from "./ContextMeter";
 import { ErrorChip } from "./ErrorChip";
 import { MessageList } from "./MessageList";
 import { ModelPicker } from "./ModelPicker";
+import { ModelsDialog } from "./ModelsDialog";
 import { SettingsPanel } from "./SettingsPanel";
 import { Sidebar } from "./Sidebar";
 import { StatusPanel } from "./StatusPanel";
@@ -32,6 +34,8 @@ export function ChatShell() {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [statusOpen, setStatusOpen] = useState(false);
+  const [modelsOpen, setModelsOpen] = useState(false);
+  const firstRunShown = useRef(false);
   const [pendingModel, setPendingModel] = useState<string | null>(null);
   const pickerRef = useRef<HTMLButtonElement>(null);
   const composerRef = useRef<ComposerHandle>(null);
@@ -55,6 +59,15 @@ export function ChatShell() {
     await refresh();
     setSearchStarting(false);
   }, [api, refresh]);
+
+  // Desktop first run: no Ollama, or no models yet -> open the install/download screen once.
+  useEffect(() => {
+    if (!IS_DESKTOP || !health || firstRunShown.current) return;
+    if (!health.ok || health.installed.length === 0) {
+      firstRunShown.current = true;
+      setModelsOpen(true);
+    }
+  }, [health]);
 
   const active = api.active;
   const model = active?.model ?? api.settings.lastModel;
@@ -172,14 +185,21 @@ export function ChatShell() {
             <Button size="icon" variant="ghost" aria-label="What's loaded" title="What's loaded" onClick={() => setStatusOpen(true)}>
               <Activity />
             </Button>
-            <Link
-              href="/benchmarks"
-              aria-label="Model benchmarks"
-              title="Model benchmarks"
-              className={buttonVariants({ variant: "ghost", size: "icon" })}
-            >
-              <ChartColumn />
-            </Link>
+            {IS_DESKTOP && (
+              <Button size="icon" variant="ghost" aria-label="Models" title="Download models" onClick={() => setModelsOpen(true)}>
+                <Download />
+              </Button>
+            )}
+            {!IS_DESKTOP && (
+              <Link
+                href="/benchmarks"
+                aria-label="Model benchmarks"
+                title="Model benchmarks"
+                className={buttonVariants({ variant: "ghost", size: "icon" })}
+              >
+                <ChartColumn />
+              </Link>
+            )}
             <Button
               size="icon"
               variant="ghost"
@@ -207,7 +227,7 @@ export function ChatShell() {
             onMode={(backend) => api.updateSettings({ backend })}
             onGpuLayers={(gpuLayers) => api.updateSettings({ gpuLayers })}
           />
-          {api.settings.backend !== "cpu" && (
+          {!IS_DESKTOP && api.settings.backend !== "cpu" && (
             <span className="text-xs text-muted-foreground">
               Switching reloads the model (10–40 s). GPU runs can make the desktop stutter.
             </span>
@@ -290,6 +310,18 @@ export function ChatShell() {
         model={model}
         gpuIgnored={gpuIgnored}
       />
+      {IS_DESKTOP && (
+        <ModelsDialog
+          open={modelsOpen}
+          onOpenChange={setModelsOpen}
+          health={health}
+          onPulled={() => void refresh()}
+          onUse={(tag) => {
+            setModelsOpen(false);
+            requestModel(tag);
+          }}
+        />
+      )}
       <SwitchModelDialog
         from={model}
         to={pendingModel}

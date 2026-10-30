@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { useCopy } from "@/hooks/useCopy";
+import { IS_DESKTOP } from "@/lib/profile";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -24,6 +26,26 @@ function Label({ children, htmlFor }: { children: React.ReactNode; htmlFor?: str
     <label htmlFor={htmlFor} className="text-sm font-medium">
       {children}
     </label>
+  );
+}
+
+/** Copies the /api/diagnostic report, to paste into a bug message. */
+function DiagnosticButton() {
+  const { copied, copy } = useCopy();
+  return (
+    <div className="space-y-1 border-t-2 border-ink/20 pt-3">
+      <Button
+        size="sm"
+        variant="outline"
+        onClick={async () => {
+          const res = await fetch("/api/diagnostic", { cache: "no-store" });
+          copy(await res.text());
+        }}
+      >
+        {copied ? "Copied" : "Copy diagnostic"}
+      </Button>
+      <p className="text-xs text-muted-foreground">Versions, GPU memory use and the server log. No chats are included.</p>
+    </div>
   );
 }
 
@@ -139,6 +161,7 @@ export function SettingsPanel({ open, onOpenChange, globalPrompt, onGlobalPrompt
         ) : (
           <p className="text-sm text-muted-foreground">Start a chat to set per-conversation options.</p>
         )}
+        {IS_DESKTOP && <DiagnosticButton />}
       </DialogContent>
     </Dialog>
   );

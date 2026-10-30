@@ -1,6 +1,7 @@
 import { del, get, set } from "idb-keyval";
 import { DEFAULT_EFFORT } from "./effort";
 import { DEFAULT_MODEL } from "./models";
+import { IS_DESKTOP } from "./profile";
 import type { ConversationMeta, Message, Settings } from "./types";
 
 // Layout: one index of conversation metadata, one key per conversation's
@@ -14,7 +15,7 @@ export const DEFAULT_SETTINGS: Settings = {
   lastModel: DEFAULT_MODEL,
   toolsEnabled: true,
   // CPU first: GPU runs make the Asahi desktop stutter.
-  backend: "cpu",
+  backend: IS_DESKTOP ? "gpu" : "cpu",
   gpuLayers: null,
   effort: DEFAULT_EFFORT,
 };

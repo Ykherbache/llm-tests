@@ -1,4 +1,5 @@
-import { DEFAULT_MAX_TOKENS, isThreadCapped, KEEP_ALIVE } from "@/lib/models";
+import { IS_DESKTOP } from "@/lib/profile";
+import { DEFAULT_MAX_TOKENS, isThreadCapped, KEEP_ALIVE, TAG_RE } from "@/lib/models";
 import { isConnRefused, json, OLLAMA_BASE_URL, OLLAMA_CPU_BASE_URL, ollamaBaseFor, ollamaDown, rejectNonLocal } from "@/lib/server";
 import { ENABLE_SCHEMAS, SEARCH_ONLY_SCHEMAS, TOOL_NAME_RE, TOOL_SCHEMAS } from "@/lib/tools";
 
@@ -6,7 +7,6 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 const ROLES = new Set(["system", "user", "assistant", "tool"]);
-const TAG_RE = /^[\w.\-/:]{1,200}$/;
 
 interface Body {
   model?: unknown;
@@ -116,7 +116,7 @@ export async function POST(req: Request): Promise<Response> {
   if (typeof body.options?.num_gpu === "number" && Number.isFinite(body.options.num_gpu)) {
     options.num_gpu = Math.round(clamp(body.options.num_gpu, 0, 999, 0));
   }
-  if (!isThreadCapped(model)) options.num_thread = 6;
+  if (!IS_DESKTOP && !isThreadCapped(model)) options.num_thread = 6;
 
   const base = ollamaBaseFor(body.backend);
   await evictOther(base);

@@ -1,6 +1,7 @@
 "use client";
 
 import { BACKEND_LABEL, numGpuFor } from "@/lib/backend";
+import { IS_DESKTOP } from "@/lib/profile";
 import type { BackendMode } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
@@ -18,9 +19,11 @@ interface Props {
   onGpuLayers: (n: number) => void;
 }
 
-const MODES: BackendMode[] = ["cpu", "prefill", "hybrid", "gpu"];
+const MODES: BackendMode[] = IS_DESKTOP ? ["gpu", "hybrid", "cpu"] : ["cpu", "prefill", "hybrid", "gpu"];
 const HINT: Record<BackendMode, string> = {
-  cpu: "Every layer runs on the CPU, on a server that has no GPU backend. Prompt reading and answer writing are both CPU.",
+  cpu: IS_DESKTOP
+    ? "Every layer runs on the CPU. Much slower than the GPU; only useful to compare."
+    : "Every layer runs on the CPU, on a server that has no GPU backend. Prompt reading and answer writing are both CPU.",
   prefill:
     "The model stays in RAM and the CPU writes the answer, but the GPU reads long prompts. Fast prompt reading without using GPU memory.",
   hybrid:

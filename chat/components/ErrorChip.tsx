@@ -4,6 +4,7 @@ import { AlertTriangle, Check, Copy, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useCopy } from "@/hooks/useCopy";
 import { modelInfo } from "@/lib/models";
+import { IS_DESKTOP } from "@/lib/profile";
 import type { ChatErrorInfo } from "@/lib/types";
 
 function Command({ cmd }: { cmd: string }) {
@@ -24,6 +25,12 @@ function describe(err: ChatErrorInfo): { title: string; commands: string[] } {
       return { title: "Ollama isn't running — start it with `ollama serve`.", commands: ["ollama serve"] };
     case "model_not_found": {
       const info = err.model ? modelInfo(err.model) : undefined;
+      if (IS_DESKTOP) {
+        return {
+          title: `Model \`${err.model ?? "unknown"}\` isn't downloaded. Use the download button in the top bar.`,
+          commands: [`ollama pull ${err.model ?? "<model>"}`],
+        };
+      }
       // The tags are local aliases, so a bare `ollama pull <alias>` cannot work:
       // pull the base weights, then recreate the thread-capped alias.
       return {

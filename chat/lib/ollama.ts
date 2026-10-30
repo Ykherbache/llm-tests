@@ -123,3 +123,39 @@ export async function startSearch(): Promise<string | null> {
     return "App server unreachable";
   }
 }
+
+export interface PullProgress {
+  status: string;
+  /** Bytes of the layer being downloaded; absent for status-only lines. */
+  total?: number;
+  completed?: number;
+}
+
+/**
+ * Downloads a model via /api/pull. Resolves with an error message on failure,
+ * else null; aborting (Cancel) resolves null, and the partial blobs resume next time.
+ */
+export async function pullModel(
+  model: string,
+  onProgress: (p: PullProgress) => void,
+  signal: AbortSignal,
+): Promise<string | null> {
+  try {
+    const res = await fetch("/api/pull", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ model }),
+      signal,
+    });
+    if (!res.ok) return ((await res.json().catch(() => ({}))) as { message?: string }).message ?? `HTTP ${res.status}`;
+    if (!res.body) return "Empty response body";
+    for await (const line of readNdjson<PullProgress & { error?: string }>(res.body)) {
+      if (line.error) return line.error;
+      onProgress(line);
+    }
+    return null;
+  } catch (e) {
+    if (isAbortError(e) || signal.aborted) return null;
+    return e instanceof Error ? e.message : "App server unreachable";
+  }
+}

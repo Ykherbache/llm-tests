@@ -1,4 +1,5 @@
 import "server-only";
+import { IS_DESKTOP } from "./profile";
 
 export const OLLAMA_BASE_URL = (process.env.OLLAMA_BASE_URL ?? "http://127.0.0.1:11434").replace(/\/+$/, "");
 /**
@@ -11,6 +12,7 @@ export const SEARXNG_URL = (process.env.SEARXNG_URL ?? "http://127.0.0.1:8888").
 
 /** The Ollama server for a backend mode: CPU -> the CPU-only server, everything else -> OLLAMA_BASE_URL. */
 export function ollamaBaseFor(backend: unknown): string {
+  if (IS_DESKTOP) return OLLAMA_BASE_URL;
   return backend === "cpu" ? OLLAMA_CPU_BASE_URL : OLLAMA_BASE_URL;
 }
 

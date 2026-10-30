@@ -6,13 +6,18 @@
     "dev": "next dev -H 127.0.0.1",
     "build": "next build",
     "start": "next start -H 127.0.0.1",
-    "lint": "eslint"
+    "lint": "eslint",
+    "electron:bundle": "esbuild electron/main.ts --bundle --platform=node --format=cjs --external:electron --outfile=electron/dist/main.js",
+    "build:desktop": "NEXT_PUBLIC_APP_PROFILE=desktop next build",
+    "electron:dev": "npm run build:desktop && npm run electron:bundle && electron .",
+    "electron:build": "npm run build:desktop && npm run electron:bundle && electron-builder --win --x64"
   },
   "dependencies": {
     "@base-ui/react": "^1.9.0",
     "@mozilla/readability": "^0.6.0",
     "class-variance-authority": "^0.7.1",
     "cn": "^0.5.0",
+    "electron-updater": "^6.8.11",
     "idb-keyval": "^6.3.0",
     "linkedom": "^0.18.14",
     "lucide-react": "^1.62.0",
@@ -33,9 +38,15 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "electron": "^45.2.0",
+    "electron-builder": "^26.18.0",
+    "esbuild": "^0.28.2",
     "eslint": "^9",
     "eslint-config-next": "15.5.28",
     "tailwindcss": "^4",
     "typescript": "^5"
-  }
+  },
+  "main": "electron/dist/main.js",
+  "description": "Local Chat",
+  "author": "Kherbache Yacine"
 }

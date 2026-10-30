@@ -1,5 +1,5 @@
 import { normalizeTag } from "@/lib/models";
-import { searchUp } from "@/lib/searxng";
+import { searchUp } from "@/lib/search";
 import { isConnRefused, json, ollamaBaseFor, rejectNonLocal } from "@/lib/server";
 
 export const runtime = "nodejs";

@@ -1,6 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // The Electron build ships .next/standalone as a self-contained server.
+  output: process.env.NEXT_PUBLIC_APP_PROFILE === "desktop" ? "standalone" : undefined,
   // gzip would buffer the NDJSON stream from /api/chat; this is a localhost app.
   compress: false,
   // Loaded from node_modules at runtime instead of bundled: linkedom pulls in

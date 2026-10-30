@@ -1,4 +1,4 @@
-import { startSearxng } from "@/lib/searxng";
+import { startSearxng } from "@/lib/search";
 import { json, rejectNonLocal } from "@/lib/server";
 
 export const runtime = "nodejs";

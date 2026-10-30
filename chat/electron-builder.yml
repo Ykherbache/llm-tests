@@ -1,0 +1,25 @@
+appId: com.local.chat
+productName: Local Chat
+directories:
+  output: release
+files:
+  - electron/dist/main.js
+  - package.json
+extraMetadata:
+  main: electron/dist/main.js
+# The Next.js standalone server runs as a separate process, so it ships as plain
+# resources (outside the asar) next to the app.
+extraResources:
+  - from: .next/standalone
+    to: server
+  - from: .next/static
+    to: server/.next/static
+win:
+  target:
+    - target: nsis
+      arch: x64
+nsis:
+  oneClick: true
+  perMachine: false
+publish:
+  provider: github

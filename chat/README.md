@@ -199,7 +199,7 @@ app/api/chat/route.ts     NDJSON proxy to Ollama (validates input, maps errors, 
 app/api/health/route.ts   /api/tags + /api/ps + SearXNG → installed/resident models, search on/off
 app/api/tools/route.ts    runs web_search / fetch_url
 lib/tools.ts              tool schemas, limits, preamble
-lib/searxng.ts            SearXNG JSON search
+lib/search.ts             web search (SearXNG on Asahi, DuckDuckGo on desktop)
 lib/fetchPage.ts          guarded page fetch + Readability extraction
 lib/chatRound.ts          one streamed model round + tool execution client
 lib/ndjson.ts             incremental NDJSON parser
