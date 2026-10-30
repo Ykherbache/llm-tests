@@ -5,7 +5,7 @@ import { useCallback, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useCopy } from "@/hooks/useCopy";
-import { MODELS, modelSubtitle } from "@/lib/models";
+import { DEFAULT_VRAM_BYTES, fitsIn, MODELS, modelSubtitle, sortForVram } from "@/lib/models";
 import { pullModel, type HealthInfo, type PullProgress } from "@/lib/ollama";
 
 const OLLAMA_DOWNLOAD = "https://ollama.com/download/windows";
@@ -32,6 +32,8 @@ export function ModelsDialog({ open, onOpenChange, health, onPulled, onUse }: Pr
   const [errors, setErrors] = useState<Record<string, string>>({});
   const controllers = useRef(new Map<string, AbortController>());
   const installed = new Set(health?.installed ?? []);
+  const vram = health?.gpu?.vramBytes ?? DEFAULT_VRAM_BYTES;
+  const vramGb = Math.round(vram / 1024 ** 3);
 
   const download = useCallback(
     async (tag: string) => {
@@ -58,7 +60,7 @@ export function ModelsDialog({ open, onOpenChange, health, onPulled, onUse }: Pr
           <DialogDescription>
             {ollamaMissing
               ? "This app talks to Ollama, which runs the models on your graphics card."
-              : "Models run on your GPU. Anything bigger than your video memory spills into RAM and gets slower."}
+              : `${health?.gpu ? `${health.gpu.name} · ${vramGb} GB` : `No NVIDIA GPU detected, assuming ${vramGb} GB`}. Models bigger than your video memory spill into RAM and get slower.`}
           </DialogDescription>
         </DialogHeader>
 
@@ -81,7 +83,7 @@ export function ModelsDialog({ open, onOpenChange, health, onPulled, onUse }: Pr
           </div>
         ) : (
           <ul className="divide-y-2 divide-ink/20">
-            {MODELS.map((m) => {
+            {sortForVram(MODELS, vram).map((m) => {
               const p = progress[m.tag];
               const done = installed.has(m.tag);
               const pct = p?.total ? Math.min(100, Math.round(((p.completed ?? 0) / p.total) * 100)) : null;
@@ -89,7 +91,12 @@ export function ModelsDialog({ open, onOpenChange, health, onPulled, onUse }: Pr
                 <li key={m.tag} className="flex flex-col gap-1.5 py-2.5">
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
-                      <p className="font-semibold">{m.label}</p>
+                      <p className="font-semibold">
+                        {m.label}{" "}
+                        <span className="rounded-full border-2 border-ink px-1.5 py-0.5 align-middle text-[10px] font-semibold">
+                          {fitsIn(m, vram) ? "fits in GPU" : "spills to RAM"}
+                        </span>
+                      </p>
                       <p className="text-xs text-muted-foreground">{modelSubtitle(m)}</p>
                     </div>
                     {done ? (

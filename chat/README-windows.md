@@ -13,7 +13,7 @@ Prévu pour une carte NVIDIA avec 16 Go de VRAM (RTX 4080 / 4080 Super).
 
 ## Premier lancement
 
-La fenêtre « Models » s'ouvre toute seule. Clique **Download** sur un modèle, attends la barre de progression, puis **Use**.
+La fenêtre « Models » s'ouvre toute seule (aussi quand le modèle choisi n'est pas encore téléchargé). Elle affiche ta carte graphique (détectée avec `nvidia-smi`) et marque chaque modèle « fits in GPU » ou « spills to RAM » selon sa mémoire vidéo. Clique **Download** sur un modèle, attends la barre de progression, puis **Use**.
 
 | Modèle | Poids | Remarque |
 |---|---|---|

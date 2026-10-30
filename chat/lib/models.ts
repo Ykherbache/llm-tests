@@ -71,9 +71,29 @@ const DESKTOP_MODELS: readonly ModelInfo[] = [
   { tag: hf("unsloth/Qwen3.5-4B-GGUF", "Q4_K_M"), label: "Qwen3.5 4B", params: "4B dense", size: "2.7 GB", expectedTps: 0, registryKey: "TINY4", baseRef: hf("unsloth/Qwen3.5-4B-GGUF", "Q4_K_M") },
   { tag: hf("mradermacher/Qwen3.5-9B-Coder-GGUF", "Q4_K_M"), label: "Qwen3.5 9B Coder", params: "9B dense", size: "5.8 GB", expectedTps: 0, registryKey: "CODER_S", baseRef: hf("mradermacher/Qwen3.5-9B-Coder-GGUF", "Q4_K_M") },
   { tag: hf("unsloth/Qwen3.8-27B-GGUF", "UD-Q3_K_XL"), label: "Qwen3.8 27B (Q3_K_XL)", params: "27B dense", size: "13.2 GB", expectedTps: 0, registryKey: "DENSE_Q3", baseRef: hf("unsloth/Qwen3.8-27B-GGUF", "UD-Q3_K_XL") },
-  { tag: hf("unsloth/Qwen3-Coder-30B-A3B-Instruct-GGUF", "Q4_K_M"), label: "Qwen3 Coder 30B (spills to RAM)", params: "30B MoE, 3.3B active", size: "18.6 GB", expectedTps: 0, registryKey: "CODER", baseRef: hf("unsloth/Qwen3-Coder-30B-A3B-Instruct-GGUF", "Q4_K_M") },
-  { tag: hf("unsloth/gemma-4-26B-A4B-it-GGUF", "UD-Q4_K_M"), label: "Gemma 4 26B (spills to RAM)", params: "26B MoE, 4B active", size: "17.0 GB", expectedTps: 0, registryKey: "MOE26", baseRef: hf("unsloth/gemma-4-26B-A4B-it-GGUF", "UD-Q4_K_M") },
+  { tag: hf("unsloth/Qwen3-Coder-30B-A3B-Instruct-GGUF", "Q4_K_M"), label: "Qwen3 Coder 30B", params: "30B MoE, 3.3B active", size: "18.6 GB", expectedTps: 0, registryKey: "CODER", baseRef: hf("unsloth/Qwen3-Coder-30B-A3B-Instruct-GGUF", "Q4_K_M") },
+  { tag: hf("unsloth/gemma-4-26B-A4B-it-GGUF", "UD-Q4_K_M"), label: "Gemma 4 26B", params: "26B MoE, 4B active", size: "17.0 GB", expectedTps: 0, registryKey: "MOE26", baseRef: hf("unsloth/gemma-4-26B-A4B-it-GGUF", "UD-Q4_K_M") },
 ];
+
+/** Weights in GB, from the `size` string ("13.2 GB"). */
+const weightsGb = (m: ModelInfo) => parseFloat(m.size);
+
+/** KV cache at the 16k context plus CUDA's own footprint, on top of the weights. */
+const GPU_OVERHEAD_GB = 2;
+/** The card this build is aimed at (RTX 4080 / 4080 Super), used when nvidia-smi finds nothing. */
+export const DEFAULT_VRAM_BYTES = 16 * 1024 ** 3;
+
+/** The model fits entirely in video memory; otherwise Ollama spills layers into RAM (slower). */
+export function fitsIn(m: ModelInfo, vramBytes: number): boolean {
+  return weightsGb(m) + GPU_OVERHEAD_GB <= vramBytes / 1024 ** 3;
+}
+
+/** Fitting models first (biggest = most capable), then the ones that spill, smallest first. */
+export function sortForVram(models: readonly ModelInfo[], vramBytes: number): ModelInfo[] {
+  const fit = models.filter((m) => fitsIn(m, vramBytes)).sort((a, b) => weightsGb(b) - weightsGb(a));
+  const spill = models.filter((m) => !fitsIn(m, vramBytes)).sort((a, b) => weightsGb(a) - weightsGb(b));
+  return [...fit, ...spill];
+}
 
 /** Models worth offering first. Pull-able from the picker. */
 export const MODELS: readonly ModelInfo[] = IS_DESKTOP ? DESKTOP_MODELS : ASAHI_MODELS;

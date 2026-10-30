@@ -60,20 +60,20 @@ export function ChatShell() {
     setSearchStarting(false);
   }, [api, refresh]);
 
-  // Desktop first run: no Ollama, or no models yet -> open the install/download screen once.
-  useEffect(() => {
-    if (!IS_DESKTOP || !health || firstRunShown.current) return;
-    if (!health.ok || health.installed.length === 0) {
-      firstRunShown.current = true;
-      setModelsOpen(true);
-    }
-  }, [health]);
-
   const active = api.active;
   const model = active?.model ?? api.settings.lastModel;
   const contextTokens = active?.contextTokens ?? 0;
   const contextRatio = contextTokens / CONTEXT_WINDOW;
   const modelMissing = installed !== null && !installed.has(model);
+
+  // Desktop first run: no Ollama, no models, or the selected model is not downloaded -> open the download screen once.
+  useEffect(() => {
+    if (!IS_DESKTOP || !health || firstRunShown.current) return;
+    if (!health.ok || health.installed.length === 0 || !health.installed.includes(model)) {
+      firstRunShown.current = true;
+      setModelsOpen(true);
+    }
+  }, [health, model]);
 
   let blockedReason: string | null = null;
   if (!api.ready || api.messagesLoading) blockedReason = "Loading chats…";
@@ -178,6 +178,8 @@ export function ChatShell() {
             installedModels={health?.installedModels}
             loaded={loaded}
             onChange={requestModel}
+            gpu={health?.gpu}
+            onNeedDownload={() => setModelsOpen(true)}
             triggerRef={pickerRef}
           />
           <div className="ml-auto flex items-center gap-1">

@@ -100,6 +100,8 @@ export interface HealthInfo {
   placement?: { tag: string; size: number; sizeVram: number }[];
   /** SearXNG reachable, so the web tools can be offered. */
   search: boolean;
+  /** Desktop build: the NVIDIA card found by nvidia-smi, null when none. */
+  gpu?: { name: string; vramBytes: number } | null;
   message?: string;
 }
 
