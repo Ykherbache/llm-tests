@@ -1,0 +1,20 @@
+# Minimal SearXNG config for the chat app's web_search tool.
+# Only the overrides live here; everything else comes from SearXNG's defaults.
+use_default_settings: true
+
+general:
+  instance_name: "local-chat-search"
+
+server:
+  # Replaced with a random value by scripts/searxng.sh on first run.
+  secret_key: "__SECRET_KEY__"
+  # Single local client; the bot limiter would only get in the way.
+  limiter: false
+  image_proxy: false
+
+search:
+  safe_search: 0
+  # JSON output is disabled by default; the app needs it.
+  formats:
+    - html
+    - json

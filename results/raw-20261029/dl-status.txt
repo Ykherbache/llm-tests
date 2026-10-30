@@ -1,0 +1,4 @@
+--- resumed after reboot 22:02:42
+Qwen3.6-35B-A3B-UD-Q4_K_M.gguf rc=0 size=22134528992 expected=22134528992
+NVIDIA-Nemotron-3.5-Lightning-30B-A3B-UD-Q3_K_XL.gguf rc=0 size=21235202112 expected=21235202112
+DL_DONE

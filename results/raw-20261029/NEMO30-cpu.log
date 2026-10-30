@@ -1,0 +1,8 @@
+ggml_vulkan: Found 1 Vulkan devices:
+ggml_vulkan: 0 = Apple M1 Pro (G13S C0) (Honeykrisp) | uma: 1 | fp16: 1 | bf16: 0 | fp4: 0 | warp size: 32 | shared memory: 32768 | int dot: 0 | matrix cores: none
+| model                          |       size |     params | backend    | ngl | threads | dev          |            test |                  t/s |
+| ------------------------------ | ---------: | ---------: | ---------- | --: | ------: | ------------ | --------------: | -------------------: |
+| nemotron_h_moe 31B.A3.5B Q3_K - Medium |  19.77 GiB |    32.91 B | Vulkan     |   0 |       6 | none         |           pp512 |        119.44 ± 0.27 |
+| nemotron_h_moe 31B.A3.5B Q3_K - Medium |  19.77 GiB |    32.91 B | Vulkan     |   0 |       6 | none         |           tg128 |         28.35 ± 0.67 |
+
+build: 418f905 (1)

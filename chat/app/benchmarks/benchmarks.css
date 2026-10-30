@@ -1,0 +1,62 @@
+/* Chart tokens for /benchmarks. Palette: bubblegum (empty context) and marigold (8k in context); ink outlines keep both legible on paper and on black. */
+.viz-root {
+  --viz-1: #ff90e8;
+  --viz-2: #ffc900;
+  --viz-grid: #d9d9d2;
+  --viz-axis: #000000;
+  --viz-good: #0b6b3a;
+  --viz-bad: #c0270a;
+  --viz-surface: var(--card);
+}
+.dark .viz-root {
+  --viz-grid: #3a3a37;
+  --viz-axis: #f4f4f0;
+  --viz-good: #3ddc84;
+  --viz-bad: #ff7a5c;
+}
+
+/* Rows are the hit target; the painted bar just responds to them. */
+.viz-row {
+  outline: none;
+  border-radius: 4px;
+}
+.viz-row:focus-visible {
+  box-shadow: 0 0 0 2px var(--viz-surface), 0 0 0 4px var(--ring);
+}
+.viz-bar {
+  border: 2px solid var(--ink);
+  border-left: 0;
+  border-radius: 0 4px 4px 0; /* square at the baseline, 4px rounded data end */
+  transition: filter 120ms;
+}
+.viz-row:hover .viz-bar,
+.viz-row:focus-visible .viz-bar {
+  filter: brightness(1.12);
+}
+
+.viz-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 9999px;
+  background: var(--viz-1);
+  border: 2px solid var(--ink);
+  box-shadow: 0 0 0 2px var(--viz-surface); /* surface ring keeps overlapping dots legible */
+  transition: transform 120ms;
+}
+.viz-dot-hit {
+  outline: none;
+}
+.viz-dot-hit:hover .viz-dot,
+.viz-dot-hit:focus-visible .viz-dot {
+  transform: scale(1.35);
+}
+.viz-dot-hit:focus-visible .viz-dot {
+  box-shadow: 0 0 0 2px var(--viz-surface), 0 0 0 4px var(--ring);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .viz-bar,
+  .viz-dot {
+    transition: none;
+  }
+}

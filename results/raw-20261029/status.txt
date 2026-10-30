@@ -1,0 +1,84 @@
+LFM24 start [cpu,cpu-d8192] avail=26.0GiB swap=0.0GiB size=14.2GB
+LFM24 cpu rc=0
+LFM24 cpu-d8192 rc=0
+LFM24 done
+CODER start [cpu,cpu-d8192] avail=26.9GiB swap=0.9GiB size=18.6GB
+CODER cpu rc=0
+CODER cpu-d8192 rc=0
+CODER done
+MOE26 start [cpu,cpu-d8192] avail=26.7GiB swap=1.0GiB size=17.0GB
+MOE26 cpu rc=0
+MOE26 cpu-d8192 rc=0
+MOE26 done
+QWEN35 start [cpu,cpu-d8192] avail=26.4GiB swap=1.3GiB size=20.7GB
+QWEN35 cpu rc=0
+QWEN35 cpu-d8192 rc=0
+QWEN35 done
+DENSE_Q3 start [cpu] avail=26.9GiB swap=1.6GiB size=13.2GB
+DENSE_Q3 cpu rc=0
+DENSE_Q3 done
+DENSE_IQ4 start [cpu] avail=26.8GiB swap=1.1GiB size=14.3GB
+--- CPU queue stopped for GPU-first reorder 10:13:00; DENSE_IQ4 cpu was killed
+GPU_GO created 10:13:04 (user asked for GPU first)
+LFM24 start [gpu,gpu-d8192] avail=26.2GiB swap=1.1GiB size=14.2GB
+LFM24 gpu SKIPPED avail=26.2 swap=1.1 size=14.2 (does not fit / guard)
+LFM24 done
+DENSE_Q3 start [gpu,gpu-d8192] avail=26.5GiB swap=1.1GiB size=13.2GB
+DENSE_Q3 gpu SKIPPED avail=26.5 swap=1.1 size=13.2 (does not fit / guard)
+DENSE_Q3 done
+DENSE_IQ4 start [gpu,gpu-d8192] avail=26.8GiB swap=1.1GiB size=14.3GB
+DENSE_IQ4 gpu SKIPPED avail=26.8 swap=1.1 size=14.3 (does not fit / guard)
+DENSE_IQ4 done
+CODER start [gpu,gpu-d8192] avail=26.9GiB swap=1.1GiB size=18.6GB
+CODER gpu SKIPPED avail=26.9 swap=1.1 size=18.6 (does not fit / guard)
+CODER done
+MOE26 start [gpu,gpu-d8192] avail=26.9GiB swap=1.1GiB size=17.0GB
+MOE26 gpu SKIPPED avail=26.9 swap=1.1 size=17.0 (does not fit / guard)
+MOE26 done
+DENSE start [gpu,gpu-d8192] avail=26.9GiB swap=1.1GiB size=16.5GB
+DENSE gpu SKIPPED avail=26.9 swap=1.1 size=16.5 (does not fit / guard)
+DENSE done
+QWEN35 start [gpu,gpu-d8192] avail=26.9GiB swap=1.1GiB size=20.7GB
+QWEN35 gpu SKIPPED avail=26.9 swap=1.1 size=20.7 (does not fit / guard)
+QWEN35 done
+NEMO30 start [gpu,gpu-d8192] avail=26.9GiB swap=1.1GiB size=21.2GB
+NEMO30 gpu SKIPPED avail=26.9 swap=1.1 size=21.2 (does not fit / guard)
+NEMO30 done
+BIG start [gpu,gpu-d8192] avail=26.9GiB swap=1.1GiB size=22.1GB
+BIG gpu SKIPPED avail=26.9 swap=1.1 size=22.1 (does not fit / guard)
+BIG done
+DENSE_IQ4 start [cpu] avail=26.9GiB swap=1.1GiB size=14.3GB
+--- GPU guard bug: swap cutoff 1.0 skipped all 9 GPU runs (swap was 1.1GiB stale). Cutoff now 2.0; GPU stage restarted 10:22:14
+LFM24 start [gpu,gpu-d8192] avail=26.7GiB swap=1.1GiB size=14.2GB
+LFM24 gpu rc=0
+LFM24 gpu-d8192 rc=0
+LFM24 done
+DENSE_Q3 start [gpu,gpu-d8192] avail=27.0GiB swap=1.1GiB size=13.2GB
+DENSE_Q3 gpu rc=0
+DENSE_Q3 gpu-d8192 rc=143
+--- GPU queue stopped by user decision (desktop lag); DENSE_Q3 gpu-d8192 killed; testing lag fix first 10:48:09
+--- CPU-only queue3 started 10:58:01 (user chose CPU-only)
+NEMO30 start [cpu,cpu-d8192] avail=26.6GiB swap=1.0GiB size=21.2GB
+NEMO30 cpu rc=0
+NEMO30 cpu-d8192 rc=0
+NEMO30 done
+BIG start [cpu,cpu-d8192] avail=27.2GiB swap=1.4GiB size=22.1GB
+BIG cpu rc=0
+BIG cpu-d8192 rc=0
+BIG done
+MOE26 start [cpu-d8192] avail=27.1GiB swap=1.5GiB size=17.0GB
+MOE26 cpu-d8192 rc=0
+MOE26 done
+DENSE_IQ4 start [cpu] avail=26.9GiB swap=1.4GiB size=14.3GB
+DENSE_IQ4 cpu rc=0
+DENSE_IQ4 done
+DENSE start [cpu] avail=27.2GiB swap=1.4GiB size=16.5GB
+DENSE cpu rc=0
+DENSE done
+DENSE_Q3 start [cpu-d8192] avail=27.0GiB swap=1.4GiB size=13.2GB
+DENSE_Q3 cpu-d8192 SKIPPED (cut for time)
+DENSE_IQ4 start [cpu-d8192] avail=27.0GiB swap=1.4GiB size=14.3GB
+DENSE_IQ4 cpu-d8192 SKIPPED (cut for time)
+DENSE start [cpu-d8192] avail=27.0GiB swap=1.4GiB size=16.5GB
+DENSE cpu-d8192 SKIPPED (cut for time)
+QUEUE_DONE

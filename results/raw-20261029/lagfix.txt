@@ -1,0 +1,6 @@
+# lag probe 10:48:51; idle baseline 2.66 s
+default | env=[] args=[] | vkcube 300 frames (s) during run: 65.65 4.64 | bench rc=0 |  pp512  19.92 ± 0.00 ;  tg16  0.73 ± 0.00 ; 
+nodes8 | env=[GGML_VK_MAX_NODES_PER_SUBMIT=8] args=[] | vkcube 300 frames (s) during run: 34.62 14.79 6.86 | bench rc=0 |  pp512  19.91 ± 0.00 ;  tg16  0.74 ± 0.00 ; 
+ub64 | env=[] args=[-ub 64] | vkcube 300 frames (s) during run: 38.29 32.91 8.71 | bench rc=0 |  pp512  16.67 ± 0.00 ;  tg16  0.73 ± 0.00 ; 
+nodes8-ub64 | env=[GGML_VK_MAX_NODES_PER_SUBMIT=8] args=[-ub 64] | vkcube 300 frames (s) during run: 17.48 41.03 14.47 | bench rc=0 |  pp512  16.72 ± 0.00 ;  tg16  0.74 ± 0.00 ; 
+LAG_DONE

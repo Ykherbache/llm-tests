@@ -1,0 +1,9 @@
+__pycache__/
+models/*.gguf
+results/*.md
+env.local
+
+# local tool state
+.omc/
+.claude/
+chat/.impeccable/
