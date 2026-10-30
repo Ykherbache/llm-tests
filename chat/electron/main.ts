@@ -2,6 +2,7 @@ import { app, BrowserWindow, dialog, shell, utilityProcess, type UtilityProcess 
 import { autoUpdater } from "electron-updater";
 import fs from "node:fs";
 import path from "node:path";
+import { unloadAll } from "../lib/unload";
 
 // Fixed port: IndexedDB is per origin, so a random port would lose the chat history at every launch.
 const PORT = 43117;
@@ -108,7 +109,17 @@ if (!app.requestSingleInstanceLock()) {
   });
 
   app.on("window-all-closed", () => app.quit());
-  app.on("before-quit", () => {
-    server?.kill();
+  // Free the video memory before exiting: Ollama would keep the model resident for 15 more minutes.
+  // Done here rather than through the Next server so it works even if that server already died.
+  let quitting = false;
+  app.on("before-quit", (e) => {
+    if (quitting) {
+      server?.kill();
+      return;
+    }
+    e.preventDefault();
+    quitting = true;
+    const base = process.env.OLLAMA_BASE_URL ?? "http://127.0.0.1:11434";
+    void Promise.race([unloadAll(base), new Promise((r) => setTimeout(r, 4000))]).finally(() => app.quit());
   });
 }

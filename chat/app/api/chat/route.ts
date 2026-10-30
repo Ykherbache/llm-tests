@@ -1,4 +1,5 @@
 import { IS_DESKTOP } from "@/lib/profile";
+import { unloadAll } from "@/lib/unload";
 import { DEFAULT_MAX_TOKENS, isThreadCapped, KEEP_ALIVE, TAG_RE } from "@/lib/models";
 import { isConnRefused, json, OLLAMA_BASE_URL, OLLAMA_CPU_BASE_URL, ollamaBaseFor, ollamaDown, rejectNonLocal } from "@/lib/server";
 import { ENABLE_SCHEMAS, SEARCH_ONLY_SCHEMAS, TOOL_NAME_RE, TOOL_SCHEMAS } from "@/lib/tools";
@@ -26,22 +27,7 @@ interface Body {
 async function evictOther(base: string): Promise<void> {
   const other = base === OLLAMA_CPU_BASE_URL ? OLLAMA_BASE_URL : OLLAMA_CPU_BASE_URL;
   if (other === base) return;
-  try {
-    const ps = await fetch(`${other}/api/ps`, { cache: "no-store", signal: AbortSignal.timeout(2000) });
-    const { models = [] } = (await ps.json()) as { models?: { name?: string; model?: string }[] };
-    await Promise.all(
-      models.map((m) =>
-        fetch(`${other}/api/generate`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ model: m.name ?? m.model, keep_alive: 0 }),
-          signal: AbortSignal.timeout(5000),
-        }),
-      ),
-    );
-  } catch {
-    // other server down or slow: nothing to free
-  }
+  await unloadAll(other);
 }
 
 function clamp(v: unknown, min: number, max: number, fallback: number): number {

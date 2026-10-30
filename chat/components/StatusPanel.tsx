@@ -1,9 +1,11 @@
 "use client";
 
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { placementText } from "@/lib/backend";
 import { modelLabel } from "@/lib/models";
-import type { HealthInfo } from "@/lib/ollama";
+import { unloadModels, type HealthInfo } from "@/lib/ollama";
 import { cn } from "@/lib/utils";
 
 type Tone = "ready" | "warn" | "off";
@@ -19,6 +21,10 @@ interface Props {
   model: string;
   /** A GPU run was requested but Ollama kept the model on the CPU. */
   gpuIgnored: boolean;
+  /** A reply is streaming: unloading now would cut it, so the button waits. */
+  generating: boolean;
+  /** Called after models were unloaded, to refresh the pills. */
+  onUnloaded: () => void;
 }
 
 const TONE: Record<Tone, string> = {
@@ -62,7 +68,8 @@ function webToolState(
   return { tone: "ready", pill: "Loaded", note: "The model can call this tool." };
 }
 
-export function StatusPanel({ open, onOpenChange, health, toolsOn, modelTools, model, gpuIgnored }: Props) {
+export function StatusPanel({ open, onOpenChange, health, toolsOn, modelTools, model, gpuIgnored, generating, onUnloaded }: Props) {
+  const [unloading, setUnloading] = useState(false);
   const web = webToolState(health, toolsOn, modelTools);
   const loaded = new Set(health?.loaded ?? []);
   const placement = new Map((health?.placement ?? []).map((p) => [p.tag, p]));
@@ -93,7 +100,23 @@ export function StatusPanel({ open, onOpenChange, health, toolsOn, modelTools, m
         </section>
 
         <section>
-          <h3 className="text-sm font-bold">Models in Ollama</h3>
+          <div className="flex items-center justify-between gap-3">
+            <h3 className="text-sm font-bold">Models in Ollama</h3>
+            <Button
+              size="xs"
+              variant="outline"
+              disabled={loaded.size === 0 || unloading || generating}
+              title={generating ? "Wait for the reply to finish" : "Free the memory held by every loaded model"}
+              onClick={async () => {
+                setUnloading(true);
+                await unloadModels();
+                setUnloading(false);
+                onUnloaded();
+              }}
+            >
+              {unloading ? "Unloading…" : "Unload all"}
+            </Button>
+          </div>
           {health && !health.ok && <p className="text-sm">{health.message ?? "Ollama is unreachable."}</p>}
           <ul className="divide-y-2 divide-ink">
             {models.map((m) => {

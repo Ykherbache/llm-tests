@@ -161,3 +161,13 @@ export async function pullModel(
     return e instanceof Error ? e.message : "App server unreachable";
   }
 }
+
+/** Unloads every resident model. Resolves with the tags that were unloaded, or null if the app server is unreachable. */
+export async function unloadModels(): Promise<string[] | null> {
+  try {
+    const res = await fetch("/api/unload", { method: "POST", headers: { "Content-Type": "application/json" }, body: "{}" });
+    return ((await res.json()) as { unloaded?: string[] }).unloaded ?? [];
+  } catch {
+    return null;
+  }
+}

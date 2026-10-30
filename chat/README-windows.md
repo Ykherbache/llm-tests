@@ -24,6 +24,10 @@ La fenêtre « Models » s'ouvre toute seule (aussi quand le modèle choisi n'es
 
 Le bandeau « Running on GPU 100% » (en haut) confirme que le modèle est bien dans la carte graphique.
 
+## Mémoire vidéo
+
+Fermer la fenêtre décharge le modèle de la carte graphique. Le bouton **Unload all** (icône pouls en haut → « What's loaded ») le fait à la demande.
+
 ## Mises à jour
 
 L'appli vérifie les nouvelles versions au démarrage et les installe à la fermeture.

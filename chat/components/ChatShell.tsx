@@ -311,6 +311,8 @@ export function ChatShell() {
         modelTools={modelTools}
         model={model}
         gpuIgnored={gpuIgnored}
+        generating={generating}
+        onUnloaded={() => void refresh()}
       />
       {IS_DESKTOP && (
         <ModelsDialog
