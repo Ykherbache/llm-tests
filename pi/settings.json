@@ -1,0 +1,51 @@
+{
+  "defaultProvider": "ollama",
+  "defaultModel": "local-qwen35-t6-24k",
+  "compaction": {
+    "reserveTokens": 8192,
+    "keepRecentTokens": 12000,
+    "modelOverrides": {
+      "ollama/local-coder-t6-24k": {
+        "reserveTokens": 6144,
+        "keepRecentTokens": 3000
+      },
+      "ollama/local-qwen35-t6-24k": {
+        "reserveTokens": 6144,
+        "keepRecentTokens": 3000
+      },
+      "ollama/local-lfm24-t6-24k": {
+        "reserveTokens": 6144,
+        "keepRecentTokens": 3000
+      },
+      "ollama/local-moe26-t6-24k": {
+        "reserveTokens": 6144,
+        "keepRecentTokens": 3000
+      },
+      "ollama-gpu/local-coder-t6-24k-gpu0": {
+        "reserveTokens": 6144,
+        "keepRecentTokens": 3000
+      },
+      "ollama-gpu/local-qwen35-t6-24k-gpu0": {
+        "reserveTokens": 6144,
+        "keepRecentTokens": 3000
+      },
+      "ollama-gpu/local-lfm24-t6-24k-gpu0": {
+        "reserveTokens": 6144,
+        "keepRecentTokens": 3000
+      },
+      "ollama-gpu/local-moe26-t6-24k-gpu0": {
+        "reserveTokens": 6144,
+        "keepRecentTokens": 3000
+      }
+    }
+  },
+  "modelThinkingLevels": {
+    "ollama/local-qwen35-t6-24k": "low",
+    "ollama/local-qwen35-t6-32k": "low",
+    "ollama-gpu/local-qwen35-t6-24k-gpu0": "low"
+  },
+  "enabledModels": [
+    "ollama/*",
+    "ollama-gpu/*"
+  ]
+}

@@ -17,6 +17,8 @@ runs well on your machine** before you commit disk and time to it.
 | `measure.py` | Times one generation; the source of truth for tok/s |
 | `wired-limit.sh` | macOS only: raises the GPU wired-memory cap |
 | `models.env` | Model registry: key, HF reference, real size, note |
+| `pi/` | pi config (`models.json`, `settings.json`) and `setup-pi.sh`, which installs it with the aliases |
+| `pi-local.sh` | starts pi after unloading Ollama models and checking free RAM |
 | `models/` | Put `.gguf` files here for `bench.sh --llama` |
 | `results/` | Generated benchmark reports (markdown) |
 
@@ -206,16 +208,21 @@ The two config files live in `~/.pi/agent/`:
 local models: `enabledModels` in `settings.json` limits cycling to `ollama/*` and `ollama-gpu/*`, and `pi-local.sh`
 hides the AWS credentials from pi (otherwise ~200 Bedrock models appear). `PI_KEEP_AWS=1 pi` brings them back.
 
+**Setting it up on a new machine.** The pi config lives in `pi/` (`models.json`, `settings.json`) and one script does the rest:
+
 ```bash
-./setup.sh --threads 6 --alias QWEN35 --ctx 24576                 # local-qwen35-t6-24k
-./setup.sh --threads 6 --alias QWEN35 --ctx 24576 --num-gpu 0     # local-qwen35-t6-24k-gpu0
-# the others are copies of existing aliases (they keep renderer, parser and sampling settings):
-printf 'FROM local-coder-t6-32k-fix\nPARAMETER num_ctx 24576\n' > m && ollama create local-coder-t6-24k -f m
-printf 'FROM local-lfm24-t6\nPARAMETER num_ctx 24576\n' > m && ollama create local-lfm24-t6-24k -f m
-printf 'FROM local-moe26-t6\nPARAMETER num_ctx 24576\n' > m && ollama create local-moe26-t6-24k -f m
-printf 'FROM local-coder-t6-24k\nPARAMETER num_gpu 0\n' > m && ollama create local-coder-t6-24k-gpu0 -f m   # same for lfm24, moe26
-./ollama-vulkan.sh start                                           # needed for the ollama-gpu models
+git clone https://github.com/Ykherbache/llm-tests && cd llm-tests
+./setup.sh                              # Ollama itself, once (see Quick start)
+./pi/setup-pi.sh --install-pi           # pi, the base models, the aliases, ~/.pi/agent/*.json
+./pi/setup-pi.sh --only qwen35,coder    # or just some models (coder, qwen35, lfm24, moe26)
+./pi/setup-pi.sh --dry-run              # prints every command first, changes nothing
 ```
+
+It pulls the models that are missing (14-21 GB each, sizes in `models.env`), creates the 24k aliases (CPU and `-gpu0`, plus the
+32k ones for Qwen3.5 and Qwen3 Coder), skips aliases that already exist (`--force` recreates them) and backs up any
+`models.json` or `settings.json` it replaces. Last, add the alias it prints to your shell config:
+`alias pi="$HOME/personal/llm-tests/pi-local.sh"`. Start the Vulkan server (`./ollama-vulkan.sh start`) only if you want the
+`ollama-gpu` models. `pi/settings.json` has no machine-specific values, so it can be copied as is.
 
 - The registry line `QWEN35` carries `qwen3.5` as renderer/parser. Without it Ollama drops the `tools` and `thinking`
   capabilities of the import (`qwen35`, without the dot, is accepted by `ollama create` but loses them just the same).
