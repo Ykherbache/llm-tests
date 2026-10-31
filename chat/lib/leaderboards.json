@@ -1,0 +1,220 @@
+{
+  "generatedAt": "2026-10-31",
+  "models": [
+    {
+      "id": "gemma426ba4b",
+      "names": [
+        "Gemma 4 26B A4B",
+        "gemma-4-26b-a4b-it"
+      ],
+      "totalB": 26,
+      "activeB": 4,
+      "tags": {
+        "hf": "hf.co/unsloth/gemma-4-26B-A4B-it-GGUF:UD-Q4_K_M"
+      },
+      "sizeBytes": 17000000000,
+      "verified": true,
+      "scores": {
+        "arena": 1434,
+        "livebench_coding": null,
+        "aider": null,
+        "aa_index": null
+      },
+      "benchId": "MOE26"
+    },
+    {
+      "id": "qwen3.827b",
+      "names": [
+        "Qwen3.8-27B"
+      ],
+      "totalB": 27,
+      "activeB": 27,
+      "tags": {
+        "hf": "hf.co/unsloth/Qwen3.8-27B-GGUF:UD-Q4_K_M"
+      },
+      "sizeBytes": 16500000000,
+      "verified": true,
+      "scores": {
+        "arena": 1438,
+        "livebench_coding": 75.7,
+        "aider": null,
+        "aa_index": null
+      },
+      "benchId": "DENSE"
+    },
+    {
+      "id": "qwen3.535ba3b",
+      "names": [
+        "Qwen3.5-35B-A3B"
+      ],
+      "totalB": 35,
+      "activeB": 3,
+      "tags": {
+        "hf": "hf.co/unsloth/Qwen3.5-35B-A3B-GGUF:Q4_K_S"
+      },
+      "sizeBytes": 20700000000,
+      "verified": true,
+      "scores": {
+        "arena": 1395,
+        "livebench_coding": null,
+        "aider": null,
+        "aa_index": null
+      },
+      "benchId": "QWEN35"
+    },
+    {
+      "id": "nemotron3.5lightning30ba3b",
+      "names": [
+        "Nemotron-3.5-Lightning-30B-A3B",
+        "nemotron-3.5-lightning-30b-a3b"
+      ],
+      "totalB": 30,
+      "activeB": 3,
+      "tags": {
+        "hf": "hf.co/unsloth/NVIDIA-Nemotron-3.5-Lightning-30B-A3B-GGUF:UD-Q3_K_XL"
+      },
+      "sizeBytes": 21200000000,
+      "verified": true,
+      "scores": {
+        "arena": null,
+        "livebench_coding": 45.8,
+        "aider": null,
+        "aa_index": null
+      },
+      "benchId": "NEMO30"
+    },
+    {
+      "id": "qwen3.527b",
+      "names": [
+        "Qwen3.5-27B"
+      ],
+      "totalB": 27,
+      "activeB": 27,
+      "tags": {
+        "hf": "hf.co/unsloth/Qwen3.5-27B-GGUF:UD-Q4_K_XL"
+      },
+      "sizeBytes": 17621125024,
+      "verified": false,
+      "scores": {
+        "arena": 1409,
+        "livebench_coding": null,
+        "aider": null,
+        "aa_index": null
+      }
+    },
+    {
+      "id": "granite4.230b",
+      "names": [
+        "Granite 4.2 30B"
+      ],
+      "totalB": 30,
+      "activeB": 30,
+      "tags": {
+        "hf": "hf.co/ibm-granite/granite-4.2-30b-GGUF:Q4_K_M"
+      },
+      "sizeBytes": 17721455328,
+      "verified": false,
+      "scores": {
+        "arena": 1361,
+        "livebench_coding": null,
+        "aider": null,
+        "aa_index": null
+      }
+    },
+    {
+      "id": "qwen332b",
+      "names": [
+        "Qwen3-32B"
+      ],
+      "totalB": 32,
+      "activeB": 32,
+      "tags": {
+        "hf": "hf.co/Qwen/Qwen3-32B-GGUF:Q4_K_M"
+      },
+      "sizeBytes": 19762149024,
+      "verified": false,
+      "scores": {
+        "arena": 1340,
+        "livebench_coding": null,
+        "aider": 40,
+        "aa_index": null
+      }
+    },
+    {
+      "id": "qwq32b",
+      "names": [
+        "QwQ-32B"
+      ],
+      "totalB": 32,
+      "activeB": 32,
+      "tags": {
+        "hf": "hf.co/MaziyarPanahi/QwQ-32B-GGUF:Q4_K_M"
+      },
+      "sizeBytes": 19851944992,
+      "verified": false,
+      "scores": {
+        "arena": 1329,
+        "livebench_coding": null,
+        "aider": 20.9,
+        "aa_index": null
+      }
+    },
+    {
+      "id": "granite4.28b",
+      "names": [
+        "Granite 4.2 8B"
+      ],
+      "totalB": 8,
+      "activeB": 8,
+      "tags": {
+        "hf": "hf.co/ibm-granite/granite-4.2-8b-GGUF:Q4_K_M"
+      },
+      "sizeBytes": 5347917952,
+      "verified": false,
+      "scores": {
+        "arena": 1319,
+        "livebench_coding": null,
+        "aider": null,
+        "aa_index": null
+      }
+    },
+    {
+      "id": "qwen330ba3b",
+      "names": [
+        "Qwen3-30B-A3B"
+      ],
+      "totalB": 30,
+      "activeB": 3,
+      "tags": {
+        "hf": "hf.co/Qwen/Qwen3-30B-A3B-GGUF:Q4_K_M"
+      },
+      "sizeBytes": 18556685824,
+      "verified": false,
+      "scores": {
+        "arena": 1317,
+        "livebench_coding": null,
+        "aider": null,
+        "aa_index": null
+      }
+    },
+    {
+      "id": "olmo3.132binstruct",
+      "names": [
+        "Olmo 3.1 32B Instruct"
+      ],
+      "totalB": 32,
+      "activeB": 32,
+      "tags": {
+        "hf": "hf.co/unsloth/Olmo-3.1-32B-Instruct-GGUF:UD-Q4_K_XL"
+      },
+      "sizeBytes": 19578742816,
+      "verified": false,
+      "scores": {
+        "arena": 1311,
+        "livebench_coding": null,
+        "aider": null,
+        "aa_index": null
+      }
+    }
+  ]
+}
