@@ -17,6 +17,25 @@ win:
   target:
     - target: nsis
       arch: x64
+# Apple Silicon only. The zip is what electron-updater downloads; the dmg is for the first install.
+# Not notarised: first launch needs right-click > Open, and in-app updates need a signed build.
+mac:
+  artifactName: Local-Chat-${version}-${arch}.${ext}
+  category: public.app-category.developer-tools
+  target:
+    - target: dmg
+      arch: arm64
+    - target: zip
+      arch: arm64
+# AppImage is the one Linux format electron-updater can replace in place. arm64 covers Asahi.
+linux:
+  artifactName: Local-Chat-${version}-${arch}.${ext}
+  category: Utility
+  target:
+    - target: AppImage
+      arch:
+        - x64
+        - arm64
 nsis:
   oneClick: true
   perMachine: false
