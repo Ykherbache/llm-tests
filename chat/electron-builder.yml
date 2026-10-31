@@ -43,4 +43,4 @@ publish:
   provider: github
   owner: Ykherbache
   repo: llm-tests
-  releaseType: release
+  releaseType: draft

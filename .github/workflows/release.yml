@@ -8,11 +8,19 @@ permissions:
   contents: write
 
 jobs:
+  # electron-builder uploads several files at once, and each upload creates its own release when
+  # none exists yet (two releases for one tag, assets split between them). Create it once up front.
+  create:
+    runs-on: ubuntu-latest
+    steps:
+      - run: gh release create "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" --draft --title "${GITHUB_REF_NAME#v}" --generate-notes
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
   build:
+    needs: create
     strategy:
       fail-fast: false
-      # One at a time: parallel jobs would race to create the same GitHub release and end up with two.
-      max-parallel: 1
       matrix:
         include:
           - os: windows-latest
@@ -40,5 +48,14 @@ jobs:
       - run: npm run build:desktop
       - run: npm run electron:bundle
       - run: npx electron-builder ${{ matrix.args }} --publish always
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # Only now does the release become visible to users and to the updater.
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - run: gh release edit "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" --draft=false --latest
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
