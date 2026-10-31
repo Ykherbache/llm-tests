@@ -1,7 +1,8 @@
 import { readNdjson } from "./ndjson";
 import type { WireMessage } from "./tokens";
 import type { ToolsMode } from "./tools";
-import type { BackendMode, ChatErrorCode, ChatErrorInfo, OllamaChunk } from "./types";
+import { snapshotRecommendations } from "./recommend";
+import type { BackendMode, CatalogHit, CatalogSource, CatalogVariant, ChatErrorCode, ChatErrorInfo, OllamaChunk, Recommendations } from "./types";
 
 // Client-side helpers. The browser only ever talks to /api/* on its own
 // origin; the route handlers proxy to OLLAMA_BASE_URL on the server.
@@ -102,6 +103,8 @@ export interface HealthInfo {
   search: boolean;
   /** Desktop build: the NVIDIA card found by nvidia-smi, null when none. */
   gpu?: { name: string; vramBytes: number } | null;
+  /** Total RAM of the machine running the app server. */
+  memoryBytes?: number;
   message?: string;
 }
 
@@ -170,4 +173,39 @@ export async function unloadModels(): Promise<string[] | null> {
   } catch {
     return null;
   }
+}
+
+export type CatalogResult<T> = { ok: true; value: T } | { ok: false; error: string };
+
+async function catalogGet<T>(query: string, key: "hits" | "variants", signal: AbortSignal): Promise<CatalogResult<T>> {
+  try {
+    const res = await fetch(`/api/catalog?${query}`, { cache: "no-store", signal });
+    const body = (await res.json()) as Record<string, unknown> & { message?: string };
+    if (!res.ok) return { ok: false, error: body.message ?? `HTTP ${res.status}` };
+    return { ok: true, value: body[key] as T };
+  } catch (e) {
+    if (isAbortError(e)) throw e;
+    return { ok: false, error: "App server unreachable" };
+  }
+}
+
+/** Searches ollama.com or Hugging Face for models. Throws on abort only. */
+export function searchCatalog(source: CatalogSource, q: string, signal: AbortSignal) {
+  return catalogGet<CatalogHit[]>(`source=${source}&q=${encodeURIComponent(q)}`, "hits", signal);
+}
+
+/** The downloadable sizes of one search hit. Throws on abort only. */
+export function catalogVariants(source: CatalogSource, model: string, signal: AbortSignal) {
+  return catalogGet<CatalogVariant[]>(`source=${source}&model=${encodeURIComponent(model)}`, "variants", signal);
+}
+
+/** Leaderboard scores from /api/recommend; falls back to the shipped snapshot when the app server cannot answer. */
+export async function fetchRecommendations(signal?: AbortSignal): Promise<Recommendations> {
+  try {
+    const res = await fetch("/api/recommend", { cache: "no-store", signal });
+    if (res.ok) return (await res.json()) as Recommendations;
+  } catch (e) {
+    if (isAbortError(e)) throw e;
+  }
+  return snapshotRecommendations();
 }

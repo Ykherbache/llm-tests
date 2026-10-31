@@ -122,3 +122,52 @@ export interface Settings {
   gpuLayers: number | null;
   effort: Effort;
 }
+
+export type CatalogSource = "ollama" | "hf";
+
+/** A model found by searching ollama.com or Hugging Face. */
+export interface CatalogHit {
+  source: CatalogSource;
+  /** Ollama library name ("qwen3") or Hugging Face repo ("unsloth/Qwen3.5-4B-GGUF"). */
+  name: string;
+  description?: string;
+  /** tools / vision / thinking... */
+  capabilities?: string[];
+  /** Parameter sizes the library offers ("8b", "30b"). */
+  sizes?: string[];
+  downloads?: number;
+}
+
+/** One downloadable size/quantisation of a hit; `tag` is what /api/pull takes. */
+export interface CatalogVariant {
+  tag: string;
+  sizeBytes: number;
+  note?: string;
+}
+
+export type BoardId = "arena" | "livebench_coding" | "aider" | "aa_index";
+export type TaskId = "chat" | "coding" | "overall";
+
+/** A model from the leaderboard snapshot: where to download it and how the public boards scored it. */
+export interface LbModel {
+  id: string;
+  /** Names the boards use for it, to match live scores against. */
+  names: string[];
+  totalB: number;
+  activeB: number;
+  tags: { ollama?: string; hf?: string };
+  sizeBytes: number;
+  /** false = the download tag was proposed by the refresh script and not yet checked by hand. */
+  verified?: boolean;
+  /** Key of the matching row in lib/benchmarks.ts, when this machine measured it. */
+  benchId?: string;
+  scores: Record<BoardId, number | null>;
+  /** Boards whose score here came from a live fetch rather than the snapshot. */
+  live?: BoardId[];
+}
+
+export interface Recommendations {
+  models: LbModel[];
+  /** Per board: whether the live fetch worked, and the date of the data. */
+  boards: Record<BoardId, { live: boolean; date: string }>;
+}

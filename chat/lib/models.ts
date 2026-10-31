@@ -85,7 +85,46 @@ export const DEFAULT_VRAM_BYTES = 16 * 1024 ** 3;
 
 /** The model fits entirely in video memory; otherwise Ollama spills layers into RAM (slower). */
 export function fitsIn(m: ModelInfo, vramBytes: number): boolean {
-  return weightsGb(m) + GPU_OVERHEAD_GB <= vramBytes / 1024 ** 3;
+  return fitFor(weightsGb(m) * 1e9, { vramBytes, memoryBytes: 0 }) === "gpu";
+}
+
+export type Fit = "gpu" | "spill" | "ram" | "too-big";
+
+export const FIT_LABEL: Record<Fit, string> = {
+  gpu: "fits in GPU",
+  spill: "spills to RAM",
+  ram: "fits in RAM",
+  "too-big": "too big",
+};
+
+/** RAM left for the operating system and the rest of the desktop; the model never gets this part. */
+const RAM_HEADROOM_GB = 8;
+
+export interface MemoryBudget {
+  vramBytes: number;
+  /** Total RAM; 0 = unknown (spilling is then never offered). */
+  memoryBytes: number;
+}
+
+/**
+ * Where a model with `sizeBytes` of weights can run. Desktop: in video memory, or
+ * spilling into RAM. Asahi has unified memory and runs on the CPU, so only RAM counts.
+ */
+export function fitFor(sizeBytes: number, { vramBytes, memoryBytes }: MemoryBudget): Fit {
+  const need = sizeBytes / 1024 ** 3 + GPU_OVERHEAD_GB;
+  const ramGb = Math.max(memoryBytes / 1024 ** 3 - RAM_HEADROOM_GB, 0);
+  if (!IS_DESKTOP) return need <= ramGb ? "ram" : "too-big";
+  if (need <= vramBytes / 1024 ** 3) return "gpu";
+  return need <= vramBytes / 1024 ** 3 + ramGb ? "spill" : "too-big";
+}
+
+/** Fitting variants first (biggest = most capable), then the ones that do not fit, smallest first. */
+export function sortByFit<T extends { sizeBytes: number }>(variants: readonly T[], budget: MemoryBudget): T[] {
+  const fits = (v: T) => fitFor(v.sizeBytes, budget) !== "too-big";
+  return [
+    ...variants.filter(fits).sort((a, b) => b.sizeBytes - a.sizeBytes),
+    ...variants.filter((v) => !fits(v)).sort((a, b) => a.sizeBytes - b.sizeBytes),
+  ];
 }
 
 /** Fitting models first (biggest = most capable), then the ones that spill, smallest first. */

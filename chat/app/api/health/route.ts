@@ -1,3 +1,4 @@
+import os from "node:os";
 import { detectGpu } from "@/lib/gpu";
 import { normalizeTag } from "@/lib/models";
 import { IS_DESKTOP } from "@/lib/profile";
@@ -55,11 +56,12 @@ export async function GET(req: Request): Promise<Response> {
       placement: ps.map((m) => ({ tag: tagOf(m), size: m.size ?? 0, sizeVram: m.size_vram ?? 0 })),
       search: await search,
       gpu,
+      memoryBytes: os.totalmem(),
     });
   } catch (e) {
     const message = isConnRefused(e)
       ? "Ollama isn't running — start it with `ollama serve`."
       : `Ollama health check failed: ${e instanceof Error ? e.message : String(e)}`;
-    return json(200, { ok: false, installed: [], installedModels: [], loaded: [], placement: [], search: await search, gpu, message });
+    return json(200, { ok: false, installed: [], installedModels: [], loaded: [], placement: [], search: await search, gpu, memoryBytes: os.totalmem(), message });
   }
 }

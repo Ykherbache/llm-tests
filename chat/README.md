@@ -134,7 +134,9 @@ How a reply with tools works:
 
 tok/s for a tool reply is total tokens divided by total decode time across all rounds (`mergeFinal` in `lib/metrics.ts`).
 
-**Network and safety.** This is the only feature that makes outbound requests, and only from the server, only while the
+**Network and safety.** Besides model search (`/api/catalog`, which contacts only ollama.com and huggingface.co, and only
+while you search) and leaderboard scores (`/api/recommend`: huggingface.co, raw.githubusercontent.com, and
+artificialanalysis.ai if you set a key), this is the only feature that makes outbound requests. It runs only from the server, only while the
 globe is on and the model decides to call a tool.
 - `fetch_url` is driven by model output. It **refuses any loopback, private, link-local or multicast address**.
 - That check runs inside the socket's own DNS lookup, so DNS rebinding and redirects into your LAN are also blocked,
@@ -147,6 +149,31 @@ globe is on and the model decides to call a tool.
   (blocking DNS rebinding), cross-site `Origin`s, and non-JSON bodies. To use the app from another machine, you'd need to
   relax both deliberately.
 - The SearXNG image is pinned by digest in `scripts/searxng.sh`.
+
+## Find models
+
+The download button in the header opens the Models dialog. Type in the search box to look for models on **ollama.com**
+(`qwen3:8b`) or **Hugging Face** (GGUF repos, pulled as `hf.co/<repo>:<quant>`), then open a result to see its sizes.
+Each size gets a badge: *fits in GPU* / *spills to RAM* (desktop, judged against video memory plus RAM) or *fits in RAM*
+(Asahi, judged against total RAM minus 8 GB for the desktop), and *too big* sorts last. `fitFor` in `lib/models.ts` is the rule.
+Downloads go through the same `/api/pull` as the built-in catalogue.
+
+### Recommendations
+
+With the search box empty, the Models dialog shows **Recommended for this machine**: open-weight models from public
+leaderboards that fit your memory, on the quality/speed frontier (nothing listed is beaten on both by another model that
+fits). Pick a task: **Chat** ranks on LMArena Elo, **Coding** on LiveBench coding (Aider as fallback), **Overall** on the
+Artificial Analysis index (LMArena as fallback). A task uses one board, never an average of different scales.
+Speed is the measured decode tok/s from `lib/benchmarks.ts` when this machine has it, otherwise an estimate from
+active parameters, shown as `~N tok/s est`.
+
+- `lib/leaderboards.json` is the committed snapshot and the only place a leaderboard name is mapped to a download tag,
+  so a model with no tag is never shown. `node scripts/refresh-leaderboards.mjs` rewrites the scores and proposes tags
+  for new models (`"verified": false`); review `git diff` before committing.
+- `/api/recommend` lays live LMArena and Aider scores (and Artificial Analysis when `ARTIFICIAL_ANALYSIS_API_KEY` is set
+  in `.env.local`) over the snapshot, cached for 6 hours. A board that fails keeps its snapshot score, and each row says
+  `live` or `snapshot <date>`. LiveBench is snapshot-only.
+- Scores are for full-precision weights; the Q4 downloads are usually a little lower.
 
 ## Troubleshooting
 
@@ -198,6 +225,8 @@ thinking". Raise max tokens in Settings and press Retry.
 app/api/chat/route.ts     NDJSON proxy to Ollama (validates input, maps errors, pipes the body)
 app/api/health/route.ts   /api/tags + /api/ps + SearXNG → installed/resident models, search on/off
 app/api/tools/route.ts    runs web_search / fetch_url
+app/api/catalog/route.ts  model search on ollama.com / Hugging Face (lib/catalog.ts)
+app/api/recommend/route.ts leaderboard scores, live over lib/leaderboards.json (lib/leaderboards.ts, lib/recommend.ts)
 lib/tools.ts              tool schemas, limits, preamble
 lib/search.ts             web search (SearXNG on Asahi, DuckDuckGo on desktop)
 lib/fetchPage.ts          guarded page fetch + Readability extraction

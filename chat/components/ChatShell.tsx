@@ -187,11 +187,9 @@ export function ChatShell() {
             <Button size="icon" variant="ghost" aria-label="What's loaded" title="What's loaded" onClick={() => setStatusOpen(true)}>
               <Activity />
             </Button>
-            {IS_DESKTOP && (
-              <Button size="icon" variant="ghost" aria-label="Models" title="Download models" onClick={() => setModelsOpen(true)}>
-                <Download />
-              </Button>
-            )}
+            <Button size="icon" variant="ghost" aria-label="Models" title="Find and download models" onClick={() => setModelsOpen(true)}>
+              <Download />
+            </Button>
             {!IS_DESKTOP && (
               <Link
                 href="/benchmarks"
@@ -314,18 +312,16 @@ export function ChatShell() {
         generating={generating}
         onUnloaded={() => void refresh()}
       />
-      {IS_DESKTOP && (
-        <ModelsDialog
-          open={modelsOpen}
-          onOpenChange={setModelsOpen}
-          health={health}
-          onPulled={() => void refresh()}
-          onUse={(tag) => {
-            setModelsOpen(false);
-            requestModel(tag);
-          }}
-        />
-      )}
+      <ModelsDialog
+        open={modelsOpen}
+        onOpenChange={setModelsOpen}
+        health={health}
+        onPulled={() => void refresh()}
+        onUse={(tag) => {
+          setModelsOpen(false);
+          requestModel(tag);
+        }}
+      />
       <SwitchModelDialog
         from={model}
         to={pendingModel}
