@@ -4,6 +4,7 @@ directories:
   output: release
 files:
   - electron/dist/main.js
+  - electron/dist/preload.js
   - package.json
 extraMetadata:
   main: electron/dist/main.js

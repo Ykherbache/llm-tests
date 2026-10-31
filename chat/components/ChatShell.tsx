@@ -10,6 +10,7 @@ import { useConversations } from "@/hooks/useConversations";
 import { useHealth } from "@/hooks/useHealth";
 import { useHotkeys } from "@/hooks/useHotkeys";
 import { useModelInfo } from "@/hooks/useModelInfo";
+import { useUpdates } from "@/hooks/useUpdates";
 import { placementText } from "@/lib/backend";
 import { CONTEXT_WINDOW } from "@/lib/models";
 import { startSearch } from "@/lib/ollama";
@@ -27,9 +28,11 @@ import { Sidebar } from "./Sidebar";
 import { StatusPanel } from "./StatusPanel";
 import { SwitchModelDialog } from "./SwitchModelDialog";
 import { ThemeToggle } from "./ThemeToggle";
+import { UpdateBanner } from "./UpdateBanner";
 
 export function ChatShell() {
   const api = useConversations();
+  const updates = useUpdates();
   const { health, refresh } = useHealth(false, api.settings.backend);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -167,6 +170,7 @@ export function ChatShell() {
       </Sheet>
 
       <main className="flex min-w-0 flex-1 flex-col">
+        <UpdateBanner updates={updates} busy={generating} />
         <header className="flex h-14 shrink-0 items-center gap-1 border-b-2 border-ink bg-card px-2">
           <Button size="icon" variant="ghost" className="md:hidden" aria-label="Open chats" onClick={() => setDrawerOpen(true)}>
             <Menu />
@@ -300,6 +304,7 @@ export function ChatShell() {
         onGlobalPrompt={(text) => api.updateSettings({ defaultSystemPrompt: text })}
         conversation={active}
         onConversation={(patch) => active && api.updateConversation(active.id, patch)}
+        updates={updates}
       />
       <StatusPanel
         open={statusOpen}

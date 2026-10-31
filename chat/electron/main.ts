@@ -1,8 +1,9 @@
-import { app, BrowserWindow, dialog, shell, utilityProcess, type UtilityProcess } from "electron";
+import { app, BrowserWindow, dialog, ipcMain, shell, utilityProcess, type UtilityProcess } from "electron";
 import { autoUpdater } from "electron-updater";
 import fs from "node:fs";
 import path from "node:path";
 import { unloadAll } from "../lib/unload";
+import type { UpdateState } from "../lib/updates";
 
 // Fixed port: IndexedDB is per origin, so a random port would lose the chat history at every launch.
 const PORT = 43117;
@@ -57,6 +58,90 @@ async function waitForServer(timeoutMs = 30_000): Promise<boolean> {
   return false;
 }
 
+let update: UpdateState = {
+  status: "idle",
+  current: app.getVersion(),
+  version: null,
+  notes: null,
+  percent: 0,
+  error: null,
+  upToDate: false,
+};
+// Only a check the user asked for reports "up to date" and errors; the launch check stays quiet.
+let manualCheck = false;
+
+function setUpdate(patch: Partial<UpdateState>): void {
+  update = { ...update, ...patch };
+  win?.webContents.send("update:state", update);
+  win?.setProgressBar(update.status === "downloading" ? update.percent / 100 : -1);
+}
+
+/** GitHub gives release notes as HTML (or a list of per-version notes); the banner shows plain text. */
+function plainNotes(raw: unknown): string | null {
+  const html = typeof raw === "string" ? raw : Array.isArray(raw) ? raw.map((n) => n?.note ?? "").join("\n") : "";
+  const text = html
+    .replace(/<li[^>]*>/gi, "• ")
+    .replace(/<\/(p|li|h[1-6]|ul|ol)>|<br\s*\/?>/gi, "\n")
+    .replace(/<[^>]+>/g, "")
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+  return text || null;
+}
+
+/** Updates are offered, never forced: the renderer shows a banner and calls back through the preload bridge. */
+function setupUpdates(logFile: string): void {
+  autoUpdater.autoDownload = false;
+  // An installed 0.1.0-rcN would otherwise only follow rc tags and never reach a stable release.
+  autoUpdater.allowPrerelease = false;
+
+  autoUpdater.on("update-available", (info) => {
+    manualCheck = false;
+    setUpdate({ status: "available", version: info.version, notes: plainNotes(info.releaseNotes), percent: 0, error: null, upToDate: false });
+  });
+  autoUpdater.on("update-not-available", () => {
+    if (manualCheck) setUpdate({ upToDate: true, error: null });
+    manualCheck = false;
+  });
+  autoUpdater.on("download-progress", (p) => setUpdate({ status: "downloading", percent: p.percent }));
+  autoUpdater.on("update-downloaded", () => setUpdate({ status: "ready", percent: 100 }));
+  autoUpdater.on("error", (err) => {
+    fs.appendFileSync(logFile, `[updater] ${err?.stack ?? err}\n`);
+    const message = err?.message ?? String(err);
+    if (update.status === "downloading") setUpdate({ status: "error", error: message });
+    else if (manualCheck) setUpdate({ error: message });
+    manualCheck = false;
+  });
+
+  ipcMain.handle("update:get", () => update);
+  ipcMain.handle("update:check", async () => {
+    if (update.status === "downloading" || update.status === "ready") return;
+    manualCheck = true;
+    setUpdate({ error: null, upToDate: false });
+    if (!app.isPackaged) {
+      manualCheck = false;
+      setUpdate({ upToDate: true });
+      return;
+    }
+    await autoUpdater.checkForUpdates().catch(() => {});
+  });
+  ipcMain.handle("update:download", async () => {
+    if (update.status !== "available" && update.status !== "error") return;
+    setUpdate({ status: "downloading", percent: 0, error: null });
+    await autoUpdater.downloadUpdate().catch(() => {});
+  });
+  // Silent install, then relaunch; the before-quit handler below still frees the GPU first.
+  ipcMain.handle("update:install", () => {
+    if (update.status === "ready") autoUpdater.quitAndInstall(true, true);
+  });
+
+  if (app.isPackaged) void autoUpdater.checkForUpdates().catch(() => {});
+}
+
 function createWindow(): void {
   win = new BrowserWindow({
     width: 1200,
@@ -64,7 +149,12 @@ function createWindow(): void {
     minWidth: 380,
     minHeight: 500,
     autoHideMenuBar: true,
-    webPreferences: { contextIsolation: true, sandbox: true, nodeIntegration: false },
+    webPreferences: {
+      contextIsolation: true,
+      sandbox: true,
+      nodeIntegration: false,
+      preload: path.join(__dirname, "preload.js"),
+    },
   });
   // Links in answers open in the real browser, never inside the app window.
   win.webContents.setWindowOpenHandler(({ url }) => {
@@ -104,8 +194,9 @@ if (!app.requestSingleInstanceLock()) {
       app.quit();
       return;
     }
+    // Handlers exist in dev too so the Settings button works there; only a packaged app checks GitHub.
+    setupUpdates(logFile);
     createWindow();
-    if (app.isPackaged) void autoUpdater.checkForUpdatesAndNotify().catch(() => {});
   });
 
   app.on("window-all-closed", () => app.quit());

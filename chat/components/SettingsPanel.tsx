@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useCopy } from "@/hooks/useCopy";
+import type { Updates } from "@/hooks/useUpdates";
 import { IS_DESKTOP } from "@/lib/profile";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -19,6 +20,7 @@ interface Props {
   onGlobalPrompt: (text: string) => void;
   conversation: ConversationMeta | null;
   onConversation: (patch: Partial<ConversationMeta>) => void;
+  updates: Updates | null;
 }
 
 function Label({ children, htmlFor }: { children: React.ReactNode; htmlFor?: string }) {
@@ -49,6 +51,28 @@ function DiagnosticButton() {
   );
 }
 
+/** Shows the running version and lets people check for an update on demand. */
+function VersionRow({ updates }: { updates: Updates }) {
+  const { state } = updates;
+  const busy = state.status === "downloading";
+  let note: string | null = null;
+  if (state.error && state.status !== "error") note = "Couldn't check for updates. Check your connection.";
+  else if (state.upToDate) note = "You're up to date.";
+  else if (state.status === "available") note = `Version ${state.version} is available.`;
+  else if (state.status === "ready") note = `Version ${state.version} is ready to install.`;
+  return (
+    <div className="space-y-1 border-t-2 border-ink/20 pt-3">
+      <div className="flex items-center justify-between gap-2">
+        <p className="text-sm">Version {state.current}</p>
+        <Button size="sm" variant="outline" disabled={busy} onClick={() => void updates.check()}>
+          Check for updates
+        </Button>
+      </div>
+      {note && <p className="text-xs text-muted-foreground">{note}</p>}
+    </div>
+  );
+}
+
 function MaxTokens({ value, onCommit }: { value: number; onCommit: (n: number) => void }) {
   const [draft, setDraft] = useState(String(value));
   const commit = () => {
@@ -73,7 +97,7 @@ function MaxTokens({ value, onCommit }: { value: number; onCommit: (n: number) =
   );
 }
 
-export function SettingsPanel({ open, onOpenChange, globalPrompt, onGlobalPrompt, conversation, onConversation }: Props) {
+export function SettingsPanel({ open, onOpenChange, globalPrompt, onGlobalPrompt, conversation, onConversation, updates }: Props) {
   const override = conversation?.systemPrompt ?? null;
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -162,6 +186,7 @@ export function SettingsPanel({ open, onOpenChange, globalPrompt, onGlobalPrompt
           <p className="text-sm text-muted-foreground">Start a chat to set per-conversation options.</p>
         )}
         {IS_DESKTOP && <DiagnosticButton />}
+        {updates && <VersionRow updates={updates} />}
       </DialogContent>
     </Dialog>
   );
